@@ -1,442 +1,570 @@
-// Eyosiyas Desta - Portfolio Application
-// Modern React 18 Architecture with Interactive Project Modal Window
+// Eyosiyas Desta - Portfolio
+// Editorial Aesthetic + Slow-Motion Motion Engine + Interactive Project Modal
 
 (function () {
-  const { useState, useEffect, createElement: h } = window.React;
+  const { useState, useEffect, createElement: h, Fragment } = window.React;
 
-  // Project Data
-  const projectsData = [
+  // Project Specifications
+  const projects = [
     {
       id: "marketto",
+      number: "01",
       title: "Marketto",
-      badge: "Featured Backend Project",
+      badge: "Featured Backend Architecture",
       kind: "E-Commerce Backend & Web Platform",
-      summary: "A robust, scalable e-commerce system built with Java & Spring Boot, providing secure RESTful APIs for product management, shopping carts, and order processing.",
-      problem: "Modern e-commerce backends require strict transactional integrity, secure user authorization, concurrent inventory handling, and fast database queries during peak traffic.",
-      solution: "Engineered a clean layered Spring Boot architecture (Controller-Service-Repository) with Spring Security and JWT. Features transactional order placement, cart persistence, role-based access (Customer vs Admin), and indexed relational data models.",
-      highlights: [
-        "Spring Security with stateless JWT authentication & refresh tokens",
-        "Role-Based Access Control (RBAC) protecting sensitive admin endpoints",
-        "Transactional order lifecycle (Pending, Confirmed, Shipped, Cancelled)",
-        "PostgreSQL database with Hibernate/JPA schema mapping & index optimization",
-        "Comprehensive REST API contracts verified using Postman & Swagger"
+      summary: "A robust, high-concurrency e-commerce backend platform built with Java and Spring Boot, designed for strict transactional consistency and performant database operations.",
+      problem: "E-commerce backends must guarantee transactional integrity during concurrent inventory checkouts, prevent race conditions, and enforce hardened token-based authentication without creating query bottlenecks.",
+      solution: "Implemented a modular layered architecture (Controller, Service, Repository) with Spring Security and stateless JWT. Designed transactional order workflows, basket persistence, role-based access control (Admin / Customer), and indexed PostgreSQL schemas.",
+      architecture: [
+        "Spring Security 6 with stateless JWT authentication & refresh token rotation",
+        "Role-Based Access Control (RBAC) securing private catalog & transaction routes",
+        "Pessimistic & optimistic locking patterns on inventory stock during checkout",
+        "PostgreSQL database mapped via Spring Data JPA with composite indexing",
+        "Comprehensive REST API contracts verified using Postman & Swagger documentation"
       ],
-      stack: ["Java", "Spring Boot", "Spring Security", "JWT", "PostgreSQL", "Hibernate/JPA", "REST API", "Docker", "Maven"],
+      stack: ["Java", "Spring Boot", "Spring Security", "PostgreSQL", "JWT", "Hibernate / JPA", "RESTful API", "Docker", "Maven"],
       repoUrl: "https://github.com/eyosiyasdesta",
       liveUrl: null
     },
     {
       id: "shelfwise",
+      number: "02",
       title: "Shelfwise",
-      badge: "Core System Project",
+      badge: "Core System Case Study",
       kind: "Digital Library Management System",
-      summary: "A structured digital library platform designed to catalog academic resources, automate borrowing lifecycles, and streamline student library operations.",
-      problem: "Traditional university library operations suffer from fragmented paper checkouts, inaccurate shelf inventory, and unmonitored overdue materials.",
-      solution: "Developed a centralized relational system with unified book indexing, automated borrower quotas, real-time checkout tracking, and instant overdue calculation.",
-      highlights: [
-        "Relational database design for titles, physical copies, and student loan records",
-        "Borrowing rules engine preventing checkouts beyond account quota or with unpaid holds",
-        "Fast catalog search by title, ISBN, author, and availability status",
-        "Clean REST API endpoints supporting frontend integration and admin dashboards"
+      summary: "A centralized digital library system for cataloging university resources, automating student circulation, and monitoring inventory turnover in real-time.",
+      problem: "Paper checkout logs and fragmented tracking create inventory discrepancies, uncollected overdue materials, and inefficient book lookup across library departments.",
+      solution: "Engineered a unified relational database with automated borrowing rule engines, dynamic overdue fine calculations, and instant multi-criteria catalog search.",
+      architecture: [
+        "Relational database modeling for titles, physical copy barcodes, and student loans",
+        "Borrowing policy enforcement (loan quotas, reservation holds, account suspension)",
+        "Search indexing by ISBN, author, classification, and availability state",
+        "RESTful endpoints supporting both staff management portals and student search"
       ],
-      stack: ["Java", "Spring Boot", "MySQL", "REST API", "Tailwind CSS", "Git"],
+      stack: ["Java", "Spring Boot", "MySQL", "Hibernate", "REST API", "Tailwind CSS", "Git"],
       repoUrl: "https://github.com/eyosiyasdesta",
       liveUrl: null
     }
   ];
 
-  const skillsData = [
+  const toolkit = [
     {
-      category: "Backend Development",
-      items: ["Java", "Spring Boot", "Spring Security", "Node.js", "Express.js", "RESTful APIs", "JWT Auth"]
+      title: "Backend Development",
+      items: ["Java", "Spring Boot", "Spring Security", "Node.js", "Express.js", "REST APIs", "JWT Auth"]
     },
     {
-      category: "Databases & Storage",
+      title: "Databases & Storage",
       items: ["PostgreSQL", "MySQL", "Database Modeling", "SQL Query Optimization", "Hibernate / JPA"]
     },
     {
-      category: "Frontend & UI",
-      items: ["React.js", "JavaScript (ES6+)", "Tailwind CSS", "HTML5 & Modern CSS", "Responsive Design"]
+      title: "Frontend Engineering",
+      items: ["React", "JavaScript (ES6+)", "Tailwind CSS", "HTML5 & Modern CSS", "Responsive UI"]
     },
     {
-      category: "Tools & Workflow",
-      items: ["Git & GitHub", "Docker Basics", "Postman", "Maven", "VS Code & IntelliJ", "Linux CLI"]
+      title: "Tools & DevOps",
+      items: ["Git & GitHub", "Docker", "Postman", "Maven", "VS Code & IntelliJ", "Linux CLI"]
     }
   ];
 
-  function App() {
-    const [selectedProject, setSelectedProject] = useState(null);
-    const [imgFailed, setImgFailed] = useState(false);
-    const [currentTime, setCurrentTime] = useState("");
-    const [copiedEmail, setCopiedEmail] = useState(false);
-    const [contactSuccess, setContactSuccess] = useState(false);
+  const navLinks = [
+    { id: "home", num: "01", label: "HOME" },
+    { id: "about", num: "02", label: "ABOUT" },
+    { id: "projects", num: "03", label: "PROJECTS" },
+    { id: "expertise", num: "04", label: "TOOLKIT" },
+    { id: "contact", num: "05", label: "CONTACT" }
+  ];
 
+  function App() {
+    const [activeSection, setActiveSection] = useState("home");
+    const [selectedProject, setSelectedProject] = useState(null);
+    const [currentTime, setCurrentTime] = useState("");
+    const [imgError, setImgError] = useState(false);
+    const [copiedEmail, setCopiedEmail] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Addis Ababa Local Clock
     useEffect(() => {
-      const updateTime = () => {
+      const updateClock = () => {
         try {
           const now = new Date();
-          const formatted = new Intl.DateTimeFormat("en-GB", {
+          const str = new Intl.DateTimeFormat("en-GB", {
             timeZone: "Africa/Addis_Ababa",
             hour: "2-digit",
             minute: "2-digit",
             hourCycle: "h23"
           }).format(now);
-          setCurrentTime(formatted);
+          setCurrentTime(str);
         } catch (e) {
-          setCurrentTime("12:00");
+          setCurrentTime("14:00");
         }
       };
-      updateTime();
-      const interval = setInterval(updateTime, 30000);
-      return () => clearInterval(interval);
+      updateClock();
+      const timer = setInterval(updateClock, 30000);
+      return () => clearInterval(timer);
     }, []);
 
-    // Handle Escape key to close modal
+    // Cinematic Slow-Motion Intersection Observer
     useEffect(() => {
-      const handleKeyDown = (e) => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -8% 0px" }
+      );
+
+      const elements = document.querySelectorAll(".reveal");
+      elements.forEach((el) => observer.observe(el));
+
+      return () => observer.disconnect();
+    }, [selectedProject]);
+
+    // Active Section Spy
+    useEffect(() => {
+      const sectionObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(entry.target.id);
+            }
+          });
+        },
+        { rootMargin: "-40% 0px -50% 0px" }
+      );
+
+      navLinks.forEach((link) => {
+        const el = document.getElementById(link.id);
+        if (el) sectionObserver.observe(el);
+      });
+
+      return () => sectionObserver.disconnect();
+    }, []);
+
+    // Escape Key Listener to Close Modal
+    useEffect(() => {
+      const onKeyDown = (e) => {
         if (e.key === "Escape") setSelectedProject(null);
       };
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
+      window.addEventListener("keydown", onKeyDown);
+      return () => window.removeEventListener("keydown", onKeyDown);
     }, []);
 
     const copyEmail = () => {
-      navigator.clipboard.writeText("eyosiyasdesta@gmail.com");
+      navigator.clipboard.writeText("contact@eyosiyasdesta.me");
       setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 2500);
-    };
-
-    const handleFormSubmit = (e) => {
-      e.preventDefault();
-      setContactSuccess(true);
-      setTimeout(() => setContactSuccess(false), 4000);
+      setTimeout(() => setCopiedEmail(false), 2400);
     };
 
     return h(
       "div",
-      { className: "min-h-screen bg-[#09090b] text-[#f4f4f5] selection:bg-[#c6f36a] selection:text-black font-sans" },
+      { className: "min-h-screen bg-[#090909] text-[#f0f0eb] font-body selection:bg-[#c6f36a] selection:text-[#090909]" },
 
-      // Header / Navbar
+      // Navigation Bar (Original High-End Editorial Style)
       h(
         "header",
-        { className: "sticky top-0 z-40 backdrop-blur-md bg-[#09090b]/85 border-b border-zinc-800/80 transition-colors" },
+        { className: "fixed inset-x-0 top-0 z-50 border-b border-[#f0f0eb]/10 bg-[#090909]/90 backdrop-blur-md transition-colors duration-500" },
         h(
           "div",
-          { className: "max-w-6xl mx-auto px-6 h-16 flex items-center justify-between" },
+          { className: "mx-auto flex h-16 max-w-[1440px] items-center justify-between px-5 md:h-20 md:px-10" },
+          
+          // Brand Logo
           h(
             "a",
-            { href: "#home", className: "flex items-center gap-2 group font-display text-xl font-bold tracking-tight text-white" },
-            h("span", { className: "w-8 h-8 rounded-lg bg-[#c6f36a] text-black font-extrabold flex items-center justify-center text-xs tracking-wider transition-transform group-hover:scale-105" }, "ED"),
-            h("span", null, "Eyosiyas", h("span", { className: "text-[#c6f36a]" }, " /"))
+            { href: "#home", className: "font-display text-2xl font-bold leading-none tracking-[-0.04em] flex items-center group" },
+            "ED",
+            h("span", { className: "text-[#c6f36a] transition-transform duration-300 group-hover:translate-x-0.5" }, "/")
           ),
+
+          // Desktop Links (Clean Numbers + Label + Lime Dot Indicator)
           h(
             "nav",
-            { className: "hidden md:flex items-center gap-8 text-xs font-mono tracking-wider uppercase text-zinc-400" },
-            h("a", { href: "#about", className: "hover:text-[#c6f36a] transition" }, "01 // About"),
-            h("a", { href: "#projects", className: "hover:text-[#c6f36a] transition" }, "02 // Projects"),
-            h("a", { href: "#skills", className: "hover:text-[#c6f36a] transition" }, "03 // Toolkit"),
-            h("a", { href: "#contact", className: "hover:text-[#c6f36a] transition" }, "04 // Contact")
+            { className: "hidden md:block", "aria-label": "Primary Navigation" },
+            h(
+              "ul",
+              { className: "flex items-center gap-8 lg:gap-10" },
+              navLinks.map((link) => {
+                const isActive = activeSection === link.id;
+                return h(
+                  "li",
+                  { key: link.id },
+                  h(
+                    "a",
+                    {
+                      href: `#${link.id}`,
+                      className: `group flex items-center gap-2.5 py-2 font-mono text-[12px] uppercase tracking-[0.12em] transition-colors duration-300 ${
+                        isActive ? "text-[#f0f0eb]" : "text-[#8c8c86] hover:text-[#f0f0eb]"
+                      }`
+                    },
+                    h("span", { className: "text-[10px] text-[#8c8c86]" }, link.num),
+                    link.label,
+                    h("span", {
+                      className: `h-1.5 w-1.5 bg-[#c6f36a] transition-opacity duration-300 ${
+                        isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      }`
+                    })
+                  )
+                );
+              })
+            )
           ),
+
+          // GitHub Profile Button + Mobile Toggle
           h(
             "div",
-            { className: "flex items-center gap-3" },
+            { className: "flex items-center gap-4" },
             h(
               "a",
               {
                 href: "https://github.com/eyosiyasdesta",
                 target: "_blank",
                 rel: "noreferrer",
-                className: "px-3.5 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:border-[#c6f36a] hover:text-[#c6f36a] text-xs font-mono transition flex items-center gap-2"
+                className: "hidden sm:inline-flex items-center border border-[#f0f0eb]/20 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[#f0f0eb] transition-colors duration-300 hover:border-[#c6f36a] hover:text-[#c6f36a]"
               },
-              h("span", null, "GitHub ↗")
+              "GitHub ↗"
+            ),
+            h(
+              "button",
+              {
+                type: "button",
+                onClick: () => setMobileMenuOpen(!mobileMenuOpen),
+                className: "border border-[#f0f0eb]/20 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] md:hidden hover:border-[#c6f36a] hover:text-[#c6f36a]"
+              },
+              mobileMenuOpen ? "CLOSE" : "MENU"
             )
-          )
-        )
-      ),
-
-      // Hero Section with Profile Frame
-      h(
-        "section",
-        { id: "home", className: "relative max-w-6xl mx-auto px-6 pt-16 pb-20 md:pt-24 md:pb-28" },
-        
-        // Location & Vol badge
-        h(
-          "div",
-          { className: "flex flex-wrap items-center justify-between gap-4 font-mono text-xs uppercase tracking-wider text-zinc-500 mb-8" },
-          h("span", null, "PORTFOLIO // VOL. 01"),
-          h("span", { className: "flex items-center gap-2" },
-            h("span", { className: "w-2 h-2 rounded-full bg-[#c6f36a] animate-pulse" }),
-            `ADDIS ABABA ${currentTime} EAT`
           )
         ),
 
-        // Main Grid: Intro & Profile Photo Card
-        h(
-          "div",
-          { className: "grid grid-cols-1 lg:grid-cols-12 gap-12 items-center" },
-
-          // Left: Typography & Bio
+        // Mobile Menu Dropdown
+        mobileMenuOpen &&
           h(
             "div",
-            { className: "lg:col-span-7 space-y-6" },
+            { className: "border-b border-[#f0f0eb]/10 bg-[#090909] px-6 py-8 md:hidden" },
+            h(
+              "ul",
+              { className: "space-y-4" },
+              navLinks.map((link) =>
+                h(
+                  "li",
+                  { key: link.id },
+                  h(
+                    "a",
+                    {
+                      href: `#${link.id}`,
+                      onClick: () => setMobileMenuOpen(false),
+                      className: "flex items-center justify-between font-display text-2xl font-bold uppercase text-[#f0f0eb] hover:text-[#c6f36a]"
+                    },
+                    link.label,
+                    h("span", { className: "font-mono text-xs text-[#8c8c86]" }, link.num)
+                  )
+                )
+              )
+            )
+          )
+      ),
+
+      // HERO SECTION (With Subtle Slow-Motion Cinematic Entry + Profile Photo Spot)
+      h(
+        "section",
+        { id: "home", className: "relative flex min-h-screen flex-col pt-24 md:pt-32" },
+        h(
+          "div",
+          { className: "relative mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-5 md:px-10" },
+
+          // Header meta row
+          h(
+            "div",
+            { className: "reveal is-visible flex flex-wrap justify-between gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86]" },
+            h("span", null, "Portfolio, Vol. 01"),
+            h("span", { className: "flex items-center gap-2" },
+              h("span", { className: "h-2 w-2 bg-[#c6f36a] animate-pulse" }),
+              `Addis Ababa ${currentTime} EAT`
+            )
+          ),
+
+          // Main Hero Grid: Headline & Profile Frame
+          h(
+            "div",
+            { className: "mt-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-end" },
+            
+            // Large Display Name
             h(
               "div",
-              { className: "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[#c6f36a] text-xs font-mono tracking-wide" },
-              h("span", { className: "w-1.5 h-1.5 rounded-full bg-[#c6f36a]" }),
-              "Software Engineering Student @ ASTU"
+              { className: "lg:col-span-8 animate-hero-rise" },
+              h(
+                "h1",
+                { className: "font-display font-bold uppercase text-[clamp(3.5rem,12vw,13rem)] leading-[0.84] tracking-[-0.05em]" },
+                h("span", { className: "block text-[#f0f0eb]" }, "Eyosiyas"),
+                h("span", { className: "flex items-baseline justify-between text-[#f0f0eb]" },
+                  "Desta",
+                  h("span", { className: "mb-2 h-4 w-4 md:h-8 md:w-8 bg-[#c6f36a] inline-block" })
+                )
+              )
             ),
-            h(
-              "h1",
-              { className: "text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight text-white leading-[1.1]" },
-              "Engineering robust backends & ",
-              h("span", { className: "text-[#c6f36a]" }, "scalable APIs"),
-              "."
-            ),
-            h(
-              "p",
-              { className: "text-base sm:text-lg text-zinc-400 leading-relaxed max-w-xl" },
-              "Hi, I'm ",
-              h("strong", { className: "text-zinc-200" }, "Eyosiyas Desta"),
-              ". Focused on the core systems beneath the user interface: clean data modeling, performant databases, and reliable RESTful services built with Java, Spring Boot, and modern tools."
-            ),
+
+            // Profile Picture Showcase Card
             h(
               "div",
-              { className: "pt-2 flex flex-wrap items-center gap-4" },
+              { className: "lg:col-span-4 reveal delay-1" },
               h(
-                "a",
-                {
-                  href: "#projects",
-                  className: "px-6 py-3 rounded-xl bg-[#c6f36a] hover:bg-white text-black font-semibold text-sm transition-all duration-300 shadow-lg shadow-[#c6f36a]/15 flex items-center gap-2"
-                },
-                "Explore Selected Work",
-                h("span", null, "↓")
-              ),
-              h(
-                "a",
-                {
-                  href: "#about",
-                  className: "px-6 py-3 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-zinc-700 text-zinc-300 hover:text-white font-medium text-sm transition"
-                },
-                "About Background"
+                "div",
+                { className: "relative w-full max-w-sm ml-auto border border-[#f0f0eb]/15 bg-[#141414] p-4 group transition-colors duration-500 hover:border-[#c6f36a]/50" },
+                h(
+                  "div",
+                  { className: "relative aspect-[4/5] w-full overflow-hidden bg-[#090909] border border-[#f0f0eb]/10 flex items-center justify-center" },
+                  !imgError
+                    ? h("img", {
+                        src: "./assets/profile.jpg",
+                        alt: "Eyosiyas Desta",
+                        onError: () => setImgError(true),
+                        className: "h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      })
+                    : h(
+                        "div",
+                        { className: "flex flex-col items-center justify-center p-6 text-center space-y-3" },
+                        h("div", { className: "w-20 h-20 bg-[#141414] border border-[#f0f0eb]/20 flex items-center justify-center text-3xl font-display font-bold text-[#c6f36a]" }, "ED"),
+                        h("p", { className: "font-mono text-xs uppercase tracking-wider text-[#8c8c86]" }, "Profile Photo"),
+                        h("span", { className: "text-[11px] font-mono text-[#8c8c86] bg-[#090909] px-3 py-1 border border-[#f0f0eb]/10" }, "Drop 'profile.jpg' into assets")
+                      )
+                ),
+                h(
+                  "div",
+                  { className: "mt-3 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.14em]" },
+                  h("span", { className: "text-[#f0f0eb]" }, "Eyosiyas Desta"),
+                  h("span", { className: "text-[#c6f36a]" }, "ASTU // SE")
+                )
               )
             )
           ),
 
-          // Right: Profile Photo Showcase Card
+          // Subtitle & Introduction
           h(
             "div",
-            { className: "lg:col-span-5 flex justify-center lg:justify-end" },
+            { className: "mt-12 grid grid-cols-1 gap-10 border-t border-[#f0f0eb]/15 py-10 md:mt-16 md:grid-cols-12" },
+            h(
+              "p",
+              { className: "reveal font-display text-2xl sm:text-3xl md:text-5xl font-bold leading-[1.08] tracking-[-0.03em] text-[#f0f0eb] md:col-span-7" },
+              "Engineering the architecture behind meaningful, high-performance systems."
+            ),
             h(
               "div",
-              { className: "relative w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 shadow-2xl backdrop-blur-sm" },
-              
-              // Photo Frame
+              { className: "reveal delay-2 flex flex-col gap-6 md:col-span-4 md:col-start-9" },
               h(
-                "div",
-                { className: "relative aspect-[4/5] w-full rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800 flex items-center justify-center group" },
-                !imgFailed
-                  ? h("img", {
-                      src: "./assets/profile.jpg",
-                      alt: "Eyosiyas Desta",
-                      onError: () => setImgFailed(true),
-                      className: "w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    })
-                  : h(
-                      "div",
-                      { className: "flex flex-col items-center justify-center p-6 text-center space-y-3" },
-                      h(
-                        "div",
-                        { className: "w-20 h-20 rounded-2xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-3xl font-display font-bold text-[#c6f36a]" },
-                        "ED"
-                      ),
-                      h("p", { className: "font-mono text-xs text-zinc-400" }, "Photo placeholder"),
-                      h(
-                        "span",
-                        { className: "text-[11px] text-zinc-500 bg-zinc-900 px-3 py-1 rounded-md border border-zinc-800" },
-                        "Drop 'profile.jpg' into assets folder"
-                      )
-                    ),
-                // Glowing border overlay
-                h("div", { className: "pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" })
+                "p",
+                { className: "leading-[1.65] text-[#8c8c86] text-base" },
+                "Software engineering student at Adama Science and Technology University. Specialized in backend systems, Java & Spring Boot, relational database design, and structured RESTful APIs."
               ),
-
-              // Profile Card Info Footer
               h(
                 "div",
-                { className: "mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono" },
+                { className: "inline-flex w-fit items-center gap-3 border border-[#f0f0eb]/15 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[#f0f0eb]" },
+                h("span", { className: "relative flex h-2 w-2" },
+                  h("span", { className: "absolute inset-0 animate-ping bg-[#c6f36a] opacity-70" }),
+                  h("span", { className: "relative h-2 w-2 bg-[#c6f36a]" })
+                ),
+                "Open to internships & engineering projects"
+              ),
+              h(
+                "div",
+                { className: "flex flex-wrap gap-3 pt-2" },
                 h(
-                  "div",
-                  null,
-                  h("div", { className: "font-semibold text-white" }, "Eyosiyas Desta"),
-                  h("div", { className: "text-zinc-500" }, "Adama Science & Tech Univ.")
+                  "a",
+                  {
+                    href: "#projects",
+                    className: "group inline-flex items-center gap-2 bg-[#c6f36a] px-6 py-3.5 font-mono text-[12px] uppercase tracking-[0.12em] text-[#090909] font-semibold transition-colors duration-300 hover:bg-[#f0f0eb]"
+                  },
+                  "View Projects",
+                  h("span", { className: "transition-transform duration-300 group-hover:translate-y-0.5" }, "↓")
                 ),
                 h(
-                  "span",
-                  { className: "px-2.5 py-1 rounded bg-[#c6f36a]/10 border border-[#c6f36a]/20 text-[#c6f36a] text-[11px]" },
-                  "Backend Dev"
+                  "a",
+                  {
+                    href: "#about",
+                    className: "inline-flex items-center border border-[#f0f0eb]/25 px-6 py-3.5 font-mono text-[12px] uppercase tracking-[0.12em] text-[#f0f0eb] transition-colors duration-300 hover:border-[#f0f0eb] hover:bg-[#141414]"
+                  },
+                  "Read Story"
                 )
+              )
+            )
+          ),
+
+          // Metadata Grid Row
+          h(
+            "dl",
+            { className: "reveal delay-3 grid grid-cols-2 border-y border-[#f0f0eb]/15 md:grid-cols-4" },
+            [
+              { label: "Role", value: "Software Engineering Student" },
+              { label: "Focus", value: "Backend & Systems Architecture" },
+              { label: "Institution", value: "ASTU (Adama, Ethiopia)" },
+              { label: "Core Stack", value: "Java // Spring Boot // PostgreSQL" }
+            ].map((item, idx) =>
+              h(
+                "div",
+                {
+                  key: idx,
+                  className: `py-5 pr-4 md:px-6 md:py-6 ${idx % 2 === 1 ? "border-l border-[#f0f0eb]/15 pl-4" : ""} ${
+                    idx > 1 ? "border-t border-[#f0f0eb]/15 md:border-t-0" : ""
+                  } ${idx > 0 ? "md:border-l md:border-[#f0f0eb]/15" : ""}`
+                },
+                h("dt", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86]" }, item.label),
+                h("dd", { className: "mt-2 text-base text-[#f0f0eb] font-medium" }, item.value)
               )
             )
           )
         )
       ),
 
-      // About Section
+      // ABOUT SECTION
       h(
         "section",
-        { id: "about", className: "border-t border-zinc-800/80 bg-zinc-950/50 py-24" },
+        { id: "about", className: "scroll-mt-20 border-t border-[#f0f0eb]/10 bg-[#141414]" },
         h(
           "div",
-          { className: "max-w-6xl mx-auto px-6" },
+          { className: "mx-auto max-w-[1440px] px-5 py-28 md:px-10 md:py-36" },
           h(
             "div",
-            { className: "flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-[#c6f36a] mb-4" },
-            h("span", null, "(01)"),
-            h("span", null, "ABOUT THE DEVELOPER")
+            { className: "flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.14em]" },
+            h("span", { className: "text-[#c6f36a]" }, "(01)"),
+            h("span", { className: "text-[#8c8c86]" }, "About Background"),
+            h("span", { className: "h-px flex-1 bg-[#f0f0eb]/15" })
           ),
           h(
-            "h2",
-            { className: "text-3xl sm:text-4xl font-bold font-display tracking-tight text-white mb-8" },
-            "Interested in what holds software up, not just what's on the surface."
+            "p",
+            { className: "reveal mt-16 font-display text-[clamp(2.25rem,5.6vw,5.5rem)] font-bold leading-[0.98] tracking-[-0.04em] text-[#f0f0eb]" },
+            "Most software is judged by its surface. I am more interested in what holds it up."
           ),
           h(
             "div",
-            { className: "grid grid-cols-1 md:grid-cols-12 gap-10 text-zinc-400 leading-relaxed text-base" },
+            { className: "mt-20 grid grid-cols-1 gap-16 md:grid-cols-12 md:gap-10" },
+            h(
+              "dl",
+              { className: "reveal grid grid-cols-1 gap-6 self-start md:sticky md:top-28 md:col-span-4" },
+              [
+                { label: "University", value: "Adama Science and Technology University" },
+                { label: "Program", value: "B.Sc. in Software Engineering" },
+                { label: "Specialization", value: "Backend Engineering, APIs, Spring Boot" },
+                { label: "Base", value: "Addis Ababa, Ethiopia" }
+              ].map((f, i) =>
+                h(
+                  "div",
+                  { key: i, className: "border-t border-[#f0f0eb]/15 pt-4" },
+                  h("dt", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86]" }, f.label),
+                  h("dd", { className: "mt-2 text-base text-[#f0f0eb]" }, f.value)
+                )
+              )
+            ),
             h(
               "div",
-              { className: "md:col-span-7 space-y-4" },
+              { className: "space-y-6 text-lg leading-[1.7] text-[#8c8c86] md:col-span-7 md:col-start-6" },
               h(
                 "p",
-                null,
-                "I am a software engineering student at Adama Science and Technology University (ASTU). I gravitate toward the structural backbone of applications: database schema design, transaction boundaries, and the clean implementation of RESTful APIs."
+                { className: "reveal text-xl text-[#f0f0eb]" },
+                "I am a software engineering student interested in how systems operate beneath the interface: how data models are normalized, how services interact via APIs, and how early architectural choices dictate whether an application survives scale."
               ),
               h(
                 "p",
-                null,
-                "Currently, I build applications primarily using Java and the Spring Boot ecosystem, pairing them with relational databases like PostgreSQL and MySQL. My approach is rooted in understanding how each design choice affects maintainability, concurrency, and security as a system scales."
+                { className: "reveal" },
+                "My primary focus is backend engineering with Java and the Spring Boot framework. I enjoy relational database design, transaction safety, and the discipline of clean API contracts. Most of what I build begins with an engineering question: how will this perform under real concurrent demand?"
               ),
               h(
                 "blockquote",
-                { className: "mt-6 border-l-2 border-[#c6f36a] pl-4 italic text-zinc-200 text-lg" },
-                "“I want to understand a system deeply enough to refactor and optimize it without fear.”"
-              )
-            ),
-            h(
-              "div",
-              { className: "md:col-span-5 space-y-3" },
-              [
-                { label: "Institution", value: "Adama Science and Technology University" },
-                { label: "Degree Program", value: "B.Sc. in Software Engineering" },
-                { label: "Primary Focus", value: "Backend Systems, APIs, Spring Boot" },
-                { label: "Location", value: "Addis Ababa, Ethiopia" }
-              ].map((fact, idx) =>
-                h(
-                  "div",
-                  { key: idx, className: "p-4 rounded-xl border border-zinc-800/80 bg-zinc-900/40" },
-                  h("div", { className: "text-xs font-mono uppercase tracking-wider text-zinc-500 mb-1" }, fact.label),
-                  h("div", { className: "text-sm font-semibold text-zinc-200" }, fact.value)
-                )
+                { className: "reveal mt-12 border-l-2 border-[#c6f36a] pl-6 font-display text-2xl sm:text-3xl font-bold leading-[1.1] tracking-[-0.03em] text-[#f0f0eb]" },
+                "“I want to understand a system deeply enough to refactor, debug, and scale it without fear.”"
               )
             )
           )
         )
       ),
 
-      // Selected Projects Section (Interactive Cards + Modal Trigger)
+      // SELECTED PROJECTS SECTION (Click to Open Interactive Window)
       h(
         "section",
-        { id: "projects", className: "border-t border-zinc-800/80 py-24" },
+        { id: "projects", className: "scroll-mt-20 border-t border-[#f0f0eb]/10 bg-[#090909]" },
         h(
           "div",
-          { className: "max-w-6xl mx-auto px-6" },
+          { className: "mx-auto max-w-[1440px] px-5 py-28 md:px-10 md:py-36" },
           h(
             "div",
-            { className: "flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4" },
+            { className: "flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.14em]" },
+            h("span", { className: "text-[#c6f36a]" }, "(02)"),
+            h("span", { className: "text-[#8c8c86]" }, "Selected Projects"),
+            h("span", { className: "h-px flex-1 bg-[#f0f0eb]/15" })
+          ),
+          h(
+            "div",
+            { className: "mt-16 grid grid-cols-1 gap-10 md:grid-cols-12 md:items-end" },
             h(
-              "div",
-              null,
-              h(
-                "div",
-                { className: "flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-[#c6f36a] mb-2" },
-                h("span", null, "(02)"),
-                h("span", null, "SELECTED WORK")
-              ),
-              h(
-                "h2",
-                { className: "text-3xl sm:text-4xl font-bold font-display tracking-tight text-white" },
-                "Engineered Case Studies"
-              )
+              "h2",
+              { className: "reveal font-display text-[clamp(3rem,8vw,8rem)] font-bold uppercase leading-[0.86] tracking-[-0.045em] text-[#f0f0eb] md:col-span-8" },
+              "Selected Work"
             ),
             h(
               "p",
-              { className: "text-xs font-mono text-zinc-400 max-w-sm" },
-              "Click on any project card below to open its dedicated architectural window and inspect problem-solution breakdowns."
+              { className: "reveal delay-1 leading-[1.65] text-[#8c8c86] md:col-span-4 md:col-start-9" },
+              "Each project is an architectural study in data integrity and scalable design. Click any case study to launch its dedicated specification window."
             )
           ),
 
-          // Project Cards Grid
+          // Clickable Project Cards
           h(
             "div",
-            { className: "grid grid-cols-1 md:grid-cols-2 gap-8" },
-            projectsData.map((project, index) =>
+            { className: "mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8" },
+            projects.map((proj) =>
               h(
-                "div",
+                "article",
                 {
-                  key: project.id,
-                  onClick: () => setSelectedProject(project),
-                  className: "group cursor-pointer rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900/90 hover:border-[#c6f36a]/50 p-7 transition-all duration-300 flex flex-col justify-between hover:shadow-2xl hover:shadow-[#c6f36a]/5"
+                  key: proj.id,
+                  onClick: () => setSelectedProject(proj),
+                  className: "reveal group cursor-pointer border border-[#f0f0eb]/15 bg-[#141414] p-8 md:p-10 transition-all duration-500 hover:border-[#c6f36a] hover:bg-[#141414]/90 flex flex-col justify-between"
                 },
                 h(
                   "div",
                   null,
                   h(
                     "div",
-                    { className: "flex items-center justify-between gap-2 mb-4" },
-                    h(
-                      "span",
-                      { className: "px-2.5 py-1 rounded-md text-[11px] font-mono font-medium bg-[#c6f36a]/10 text-[#c6f36a] border border-[#c6f36a]/20" },
-                      project.badge
-                    ),
-                    h("span", { className: "font-mono text-xs text-zinc-500" }, `0${index + 1}`)
+                    { className: "flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.14em] mb-6" },
+                    h("span", { className: "text-[#c6f36a]" }, `Case Study ${proj.number}`),
+                    h("span", { className: "text-[#8c8c86]" }, proj.kind)
                   ),
                   h(
                     "h3",
-                    { className: "text-2xl font-bold font-display text-white mb-2 group-hover:text-[#c6f36a] transition-colors" },
-                    project.title
+                    { className: "font-display text-4xl sm:text-5xl font-bold uppercase leading-[0.9] tracking-[-0.04em] text-[#f0f0eb] mb-4 group-hover:text-[#c6f36a] transition-colors duration-300" },
+                    proj.title
                   ),
                   h(
                     "p",
-                    { className: "text-xs font-mono text-zinc-400 mb-3" },
-                    project.kind
+                    { className: "text-lg text-[#f0f0eb] leading-[1.6] mb-6 font-medium" },
+                    proj.summary
                   ),
                   h(
-                    "p",
-                    { className: "text-sm text-zinc-300 leading-relaxed mb-6" },
-                    project.summary
+                    "div",
+                    { className: "space-y-4 border-t border-[#f0f0eb]/15 pt-6 text-sm text-[#8c8c86]" },
+                    h(
+                      "div",
+                      null,
+                      h("span", { className: "block font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86] mb-1" }, "Core Challenge"),
+                      h("p", { className: "leading-[1.6]" }, proj.problem)
+                    )
                   )
                 ),
 
+                // Card Footer
                 h(
                   "div",
-                  { className: "pt-4 border-t border-zinc-800/80" },
+                  { className: "mt-10 pt-6 border-t border-[#f0f0eb]/15 flex flex-wrap items-center justify-between gap-4" },
                   h(
-                    "div",
-                    { className: "flex flex-wrap gap-1.5 mb-5" },
-                    project.stack.slice(0, 5).map((tech, tIdx) =>
-                      h(
-                        "span",
-                        { key: tIdx, className: "px-2.5 py-1 rounded text-xs font-mono bg-zinc-800/80 text-zinc-300" },
-                        tech
-                      )
-                    ),
-                    project.stack.length > 5 &&
-                      h("span", { className: "px-2 py-1 text-xs font-mono text-zinc-500" }, `+${project.stack.length - 5} more`)
+                    "ul",
+                    { className: "flex flex-wrap gap-2" },
+                    proj.stack.slice(0, 4).map((tech, tIdx) =>
+                      h("li", { key: tIdx, className: "border border-[#f0f0eb]/20 px-2.5 py-1 font-mono text-[11px] uppercase text-[#f0f0eb]" }, tech)
+                    )
                   ),
                   h(
                     "div",
-                    { className: "inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#c6f36a] group-hover:translate-x-1 transition-transform" },
-                    "Open Project Window",
-                    h("span", null, "→")
+                    { className: "inline-flex items-center gap-2 border-b border-[#f0f0eb] pb-1 font-mono text-[12px] uppercase tracking-[0.12em] text-[#f0f0eb] group-hover:border-[#c6f36a] group-hover:text-[#c6f36a] transition-colors" },
+                    "Open Window",
+                    h("span", null, "↗")
                   )
                 )
               )
@@ -445,248 +573,289 @@
         )
       ),
 
-      // Toolkit & Capabilities Section
+      // TOOLKIT / EXPERTISE SECTION
       h(
         "section",
-        { id: "skills", className: "border-t border-zinc-800/80 bg-zinc-950/40 py-24" },
+        { id: "expertise", className: "scroll-mt-20 border-t border-[#f0f0eb]/10 bg-[#141414]" },
         h(
           "div",
-          { className: "max-w-6xl mx-auto px-6" },
+          { className: "mx-auto max-w-[1440px] px-5 py-28 md:px-10 md:py-36" },
           h(
             "div",
-            { className: "flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-[#c6f36a] mb-2" },
-            h("span", null, "(03)"),
-            h("span", null, "TECHNICAL TOOLKIT")
-          ),
-          h(
-            "h2",
-            { className: "text-3xl sm:text-4xl font-bold font-display tracking-tight text-white mb-12" },
-            "Technologies & Engineering Stack"
+            { className: "flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.14em]" },
+            h("span", { className: "text-[#c6f36a]" }, "(03)"),
+            h("span", { className: "text-[#8c8c86]" }, "Technical Toolkit"),
+            h("span", { className: "h-px flex-1 bg-[#f0f0eb]/15" })
           ),
           h(
             "div",
-            { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" },
-            skillsData.map((category, idx) =>
+            { className: "mt-16 grid grid-cols-1 gap-10 md:grid-cols-12 md:items-end" },
+            h(
+              "h2",
+              { className: "reveal font-display text-[clamp(3rem,8vw,8rem)] font-bold uppercase leading-[0.86] tracking-[-0.045em] text-[#f0f0eb] md:col-span-8" },
+              "Toolkit"
+            ),
+            h(
+              "p",
+              { className: "reveal delay-1 leading-[1.65] text-[#8c8c86] md:col-span-4 md:col-start-9" },
+              "Languages, frameworks, and architecture patterns I build with daily. Honed through projects, coursework, and systems exploration."
+            )
+          ),
+          h(
+            "div",
+            { className: "mt-20" },
+            toolkit.map((item, idx) =>
               h(
                 "div",
-                { key: idx, className: "p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50" },
-                h("h3", { className: "text-sm font-mono uppercase tracking-wider text-[#c6f36a] mb-4 pb-2 border-b border-zinc-800" }, category.category),
+                { key: idx, className: "reveal grid grid-cols-1 gap-6 border-t border-[#f0f0eb]/15 py-10 md:grid-cols-12 md:py-14" },
+                h(
+                  "div",
+                  { className: "flex items-start gap-4 md:col-span-4" },
+                  h("span", { className: "pt-1 font-mono text-[11px] text-[#8c8c86]" }, `0${idx + 1}`),
+                  h("h3", { className: "font-display text-2xl font-bold uppercase tracking-[-0.02em] text-[#f0f0eb]" }, item.title)
+                ),
                 h(
                   "ul",
-                  { className: "space-y-2.5" },
-                  category.items.map((item, iIdx) =>
+                  { className: "flex flex-wrap gap-x-8 gap-y-2 md:col-span-8" },
+                  item.items.map((tech, tIdx) =>
                     h(
                       "li",
-                      { key: iIdx, className: "text-sm font-medium text-zinc-300 flex items-center gap-2" },
-                      h("span", { className: "w-1 h-1 rounded-full bg-zinc-500" }),
-                      item
+                      { key: tIdx, className: "cursor-default font-display text-3xl font-bold uppercase tracking-[-0.03em] text-[#8c8c86] transition-colors duration-300 hover:text-[#c6f36a] md:text-5xl" },
+                      tech
                     )
                   )
                 )
               )
-            )
+            ),
+            h("div", { className: "border-t border-[#f0f0eb]/15" })
           )
         )
       ),
 
-      // Contact Section
+      // CONTACT SECTION
       h(
         "section",
-        { id: "contact", className: "border-t border-zinc-800/80 py-24" },
+        { id: "contact", className: "scroll-mt-20 border-t border-[#f0f0eb]/10 bg-[#090909]" },
         h(
           "div",
-          { className: "max-w-4xl mx-auto px-6 text-center" },
+          { className: "mx-auto max-w-[1440px] px-5 py-28 md:px-10 md:py-36" },
           h(
             "div",
-            { className: "inline-flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-[#c6f36a] mb-3" },
-            h("span", null, "(04)"),
-            h("span", null, "GET IN TOUCH")
+            { className: "flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.14em]" },
+            h("span", { className: "text-[#c6f36a]" }, "(04)"),
+            h("span", { className: "text-[#8c8c86]" }, "Contact"),
+            h("span", { className: "h-px flex-1 bg-[#f0f0eb]/15" })
           ),
           h(
             "h2",
-            { className: "text-4xl sm:text-5xl font-bold font-display text-white mb-4" },
-            "Have something worth building?"
+            { className: "reveal mt-16 font-display text-[clamp(3.25rem,10.5vw,11.5rem)] font-bold uppercase leading-[0.84] tracking-[-0.05em] text-[#f0f0eb]" },
+            "Have something",
+            h("br", null),
+            h("span", { className: "text-[#8c8c86]" }, "worth building?")
           ),
           h(
             "p",
-            { className: "text-zinc-400 text-base max-w-lg mx-auto mb-10 leading-relaxed" },
-            "Whether you have a backend question, an internship opportunity, or want to discuss Spring Boot architecture, my inbox is open."
+            { className: "reveal delay-1 mt-10 max-w-xl text-lg leading-[1.65] text-[#8c8c86]" },
+            "Whether you need a backend service designed, database optimization, or have an engineering internship opportunity, I am always open to conversation."
           ),
           h(
-            "div",
-            { className: "flex flex-wrap items-center justify-center gap-4 mb-12" },
-            h(
-              "button",
-              {
-                onClick: copyEmail,
-                className: "px-6 py-3.5 rounded-xl bg-zinc-900 border border-zinc-700 hover:border-[#c6f36a] text-white font-mono text-xs uppercase tracking-wider transition flex items-center gap-2"
-              },
-              copiedEmail ? "✓ Copied to clipboard!" : "Copy: contact@eyosiyasdesta.me"
-            ),
-            h(
-              "a",
-              {
-                href: "https://github.com/eyosiyasdesta",
-                target: "_blank",
-                rel: "noreferrer",
-                className: "px-6 py-3.5 rounded-xl bg-[#c6f36a] hover:bg-white text-black font-semibold text-xs font-mono uppercase tracking-wider transition"
-              },
-              "Visit GitHub Profile ↗"
+            "ul",
+            { className: "mt-16 border-t border-[#f0f0eb]/15" },
+            [
+              { label: "Email", value: "contact@eyosiyasdesta.me", isEmail: true },
+              { label: "GitHub", value: "github.com/eyosiyasdesta", href: "https://github.com/eyosiyasdesta" },
+              { label: "Institution", value: "Adama Science and Technology University", href: null }
+            ].map((contact, cIdx) =>
+              h(
+                "li",
+                { key: cIdx, className: "reveal border-b border-[#f0f0eb]/15" },
+                contact.isEmail
+                  ? h(
+                      "button",
+                      {
+                        onClick: copyEmail,
+                        className: "group w-full flex items-center justify-between gap-6 py-8 text-left transition-colors"
+                      },
+                      h("span", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86]" }, contact.label),
+                      h(
+                        "span",
+                        { className: "flex items-center gap-4 font-display text-xl sm:text-3xl md:text-5xl font-bold uppercase tracking-[-0.03em] text-[#f0f0eb] group-hover:text-[#c6f36a] transition-colors" },
+                        copiedEmail ? "✓ Copied to clipboard!" : contact.value
+                      )
+                    )
+                  : contact.href
+                  ? h(
+                      "a",
+                      {
+                        href: contact.href,
+                        target: "_blank",
+                        rel: "noreferrer",
+                        className: "group flex items-center justify-between gap-6 py-8"
+                      },
+                      h("span", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86]" }, contact.label),
+                      h(
+                        "span",
+                        { className: "flex items-center gap-4 font-display text-xl sm:text-3xl md:text-5xl font-bold uppercase tracking-[-0.03em] text-[#f0f0eb] group-hover:text-[#c6f36a] transition-colors" },
+                        contact.value,
+                        h("span", { className: "text-2xl sm:text-4xl transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" }, "↗")
+                      )
+                    )
+                  : h(
+                      "div",
+                      { className: "flex items-center justify-between gap-6 py-8" },
+                      h("span", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86]" }, contact.label),
+                      h("span", { className: "font-mono text-[12px] uppercase tracking-[0.12em] text-[#8c8c86]" }, contact.value)
+                    )
+              )
             )
           )
         )
       ),
 
-      // Footer
+      // FOOTER
       h(
         "footer",
-        { className: "border-t border-zinc-800/80 py-8 text-xs font-mono text-zinc-500" },
+        { className: "border-t border-[#f0f0eb]/10 bg-[#090909] py-10" },
         h(
           "div",
-          { className: "max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4" },
-          h(
-            "div",
-            null,
-            "© ",
-            new Date().getFullYear(),
-            " Eyosiyas Desta • Software Engineering, ASTU • ",
-            h("a", { href: "https://eyosiyasdesta.me", className: "text-zinc-400 hover:text-[#c6f36a]" }, "eyosiyasdesta.me")
-          ),
+          { className: "mx-auto flex max-w-[1440px] flex-col gap-6 px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86] md:flex-row md:items-center md:justify-between md:px-10" },
+          h("span", { className: "font-display text-lg font-bold text-[#f0f0eb] normal-case tracking-[-0.02em]" }, "Eyosiyas Desta"),
+          h("span", null, "Software Engineering, ASTU // 2026"),
           h(
             "a",
-            { href: "#home", className: "text-zinc-400 hover:text-white transition" },
-            "Back to top ↑"
+            { href: "#home", className: "group inline-flex items-center gap-2 text-[#f0f0eb] hover:text-[#c6f36a] transition-colors" },
+            "Back to top",
+            h("span", { className: "inline-block transition-transform duration-300 group-hover:-translate-y-1" }, "↑")
           )
         )
       ),
 
-      // THE INTERACTIVE PROJECT MODAL WINDOW
+      // THE INTERACTIVE CASE STUDY WINDOW (MODAL)
       selectedProject &&
         h(
           "div",
           {
-            className: "fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in",
+            className: "fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#090909]/85 backdrop-blur-md animate-modal-entry",
             onClick: () => setSelectedProject(null)
           },
           h(
             "div",
             {
-              className: "relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-zinc-700 bg-zinc-900 p-6 sm:p-8 shadow-2xl text-left animate-modal",
+              className: "relative w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-[#f0f0eb]/25 bg-[#141414] p-6 sm:p-10 shadow-2xl text-left",
               onClick: (e) => e.stopPropagation()
             },
             
-            // Modal Top Header
+            // Modal Header
             h(
               "div",
-              { className: "flex items-start justify-between gap-4 pb-4 border-b border-zinc-800" },
+              { className: "flex items-start justify-between gap-4 border-b border-[#f0f0eb]/15 pb-6" },
               h(
                 "div",
                 null,
                 h(
                   "div",
-                  { className: "inline-block px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-[#c6f36a]/15 text-[#c6f36a] border border-[#c6f36a]/30 mb-2" },
-                  selectedProject.kind
+                  { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#c6f36a] mb-2" },
+                  `${selectedProject.badge} // CASE STUDY ${selectedProject.number}`
                 ),
-                h("h3", { className: "text-2xl sm:text-3xl font-bold font-display text-white" }, selectedProject.title)
+                h("h3", { className: "font-display text-4xl sm:text-5xl font-bold uppercase tracking-[-0.04em] text-[#f0f0eb]" }, selectedProject.title),
+                h("p", { className: "font-mono text-xs uppercase tracking-wider text-[#8c8c86] mt-1" }, selectedProject.kind)
               ),
               h(
                 "button",
                 {
                   onClick: () => setSelectedProject(null),
-                  className: "p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition text-lg font-mono",
-                  "aria-label": "Close modal"
+                  className: "border border-[#f0f0eb]/20 px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider text-[#f0f0eb] hover:border-[#c6f36a] hover:text-[#c6f36a] transition-colors"
                 },
-                "✕"
+                "CLOSE [ESC]"
               )
             ),
 
-            // Modal Body: Problem & Solution
+            // Modal Body
             h(
               "div",
-              { className: "mt-6 space-y-6 text-sm text-zinc-300 leading-relaxed" },
+              { className: "mt-8 space-y-8 text-[#f0f0eb]" },
+              
+              // Overview
               h(
                 "div",
                 null,
-                h("h4", { className: "text-xs font-mono uppercase tracking-wider text-zinc-500 mb-1" }, "Overview"),
-                h("p", { className: "text-base text-zinc-200" }, selectedProject.summary)
+                h("h4", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86] mb-2" }, "Summary Overview"),
+                h("p", { className: "text-lg leading-[1.65] text-[#f0f0eb]" }, selectedProject.summary)
               ),
+
+              // Problem & Solution Split
               h(
                 "div",
-                { className: "p-4 rounded-xl bg-zinc-950 border border-zinc-800/80 space-y-3" },
+                { className: "grid grid-cols-1 md:grid-cols-2 gap-6 border border-[#f0f0eb]/15 bg-[#090909] p-6" },
                 h(
                   "div",
                   null,
-                  h("span", { className: "text-xs font-mono font-bold text-red-400 uppercase tracking-wide block mb-1" }, "The Engineering Problem"),
-                  h("p", { className: "text-zinc-400 text-xs sm:text-sm leading-relaxed" }, selectedProject.problem)
+                  h("span", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86] block mb-2" }, "The Engineering Problem"),
+                  h("p", { className: "text-sm text-[#8c8c86] leading-[1.65]" }, selectedProject.problem)
                 ),
                 h(
                   "div",
-                  { className: "pt-2 border-t border-zinc-800/60" },
-                  h("span", { className: "text-xs font-mono font-bold text-[#c6f36a] uppercase tracking-wide block mb-1" }, "The Implemented Solution"),
-                  h("p", { className: "text-zinc-300 text-xs sm:text-sm leading-relaxed" }, selectedProject.solution)
+                  null,
+                  h("span", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#c6f36a] block mb-2" }, "The Implemented Solution"),
+                  h("p", { className: "text-sm text-[#f0f0eb] leading-[1.65]" }, selectedProject.solution)
                 )
               ),
 
               // Architectural Highlights
-              selectedProject.highlights &&
-                h(
-                  "div",
-                  null,
-                  h("h4", { className: "text-xs font-mono uppercase tracking-wider text-zinc-500 mb-2" }, "Key Features & Architecture"),
-                  h(
-                    "ul",
-                    { className: "space-y-2" },
-                    selectedProject.highlights.map((item, hIdx) =>
-                      h(
-                        "li",
-                        { key: hIdx, className: "text-xs sm:text-sm flex items-start gap-2" },
-                        h("span", { className: "text-[#c6f36a] font-bold" }, "✓"),
-                        h("span", { className: "text-zinc-300" }, item)
-                      )
-                    )
-                  )
-                ),
-
-              // Technologies Stack
               h(
                 "div",
                 null,
-                h("h4", { className: "text-xs font-mono uppercase tracking-wider text-zinc-500 mb-2" }, "Technologies Used"),
+                h("h4", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86] mb-4" }, "Architectural & Technical Highlights"),
+                h(
+                  "ul",
+                  { className: "space-y-3" },
+                  selectedProject.architecture.map((item, idx) =>
+                    h(
+                      "li",
+                      { key: idx, className: "flex items-start gap-3 text-sm leading-relaxed" },
+                      h("span", { className: "text-[#c6f36a] font-mono" }, "—"),
+                      h("span", { className: "text-[#f0f0eb]" }, item)
+                    )
+                  )
+                )
+              ),
+
+              // Stack Badges
+              h(
+                "div",
+                null,
+                h("h4", { className: "font-mono text-[11px] uppercase tracking-[0.14em] text-[#8c8c86] mb-3" }, "Technologies Applied"),
                 h(
                   "div",
                   { className: "flex flex-wrap gap-2" },
                   selectedProject.stack.map((t, idx) =>
-                    h(
-                      "span",
-                      { key: idx, className: "px-2.5 py-1 rounded bg-zinc-800 text-xs font-mono text-zinc-300 border border-zinc-700" },
-                      t
-                    )
+                    h("span", { key: idx, className: "border border-[#f0f0eb]/20 px-3 py-1 font-mono text-[11px] uppercase text-[#f0f0eb]" }, t)
                   )
                 )
               )
             ),
 
-            // Modal Footer Links
+            // Modal Footer
             h(
               "div",
-              { className: "mt-8 pt-4 border-t border-zinc-800 flex items-center justify-between" },
+              { className: "mt-10 border-t border-[#f0f0eb]/15 pt-6 flex flex-wrap items-center justify-between gap-4" },
               h(
                 "a",
                 {
                   href: selectedProject.repoUrl,
                   target: "_blank",
                   rel: "noreferrer",
-                  className: "px-5 py-2.5 rounded-xl bg-[#c6f36a] hover:bg-white text-black font-semibold text-xs font-mono uppercase tracking-wider transition flex items-center gap-2"
+                  className: "inline-flex items-center gap-2 bg-[#c6f36a] px-6 py-3 font-mono text-[12px] uppercase tracking-[0.12em] text-[#090909] font-bold transition-colors hover:bg-[#f0f0eb]"
                 },
-                "GitHub Repository ↗"
+                "View GitHub Repository ↗"
               ),
               h(
                 "button",
                 {
                   onClick: () => setSelectedProject(null),
-                  className: "px-4 py-2 rounded-xl text-xs font-mono text-zinc-400 hover:text-white transition"
+                  className: "font-mono text-xs uppercase tracking-wider text-[#8c8c86] hover:text-[#f0f0eb] transition-colors"
                 },
-                "Close [ESC]"
+                "Dismiss Window [ESC]"
               )
             )
           )
@@ -695,9 +864,8 @@
   }
 
   // Mount Application
-  const rootElement = document.getElementById("root");
-  if (rootElement && window.ReactDOM) {
-    const root = window.ReactDOM.createRoot(rootElement);
-    root.render(h(App));
+  const root = document.getElementById("root");
+  if (root && window.ReactDOM) {
+    window.ReactDOM.createRoot(root).render(h(App));
   }
 })();
