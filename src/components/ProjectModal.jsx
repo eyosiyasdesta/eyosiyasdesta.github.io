@@ -1,109 +1,92 @@
 import React, { useEffect } from 'react';
-import { X, ExternalLink, CheckCircle2, Server, Layers, Cpu } from 'lucide-react';
+import { X, ArrowUpRight } from 'lucide-react';
 import { GithubIcon } from './Icons';
 
 export default function ProjectModal({ project, onClose }) {
   useEffect(() => {
+    // Only lock scroll when modal is mounted
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
-    document.body.style.overflow = 'hidden';
+
     return () => {
+      document.body.style.overflow = originalOverflow;
       window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'auto';
     };
   }, [onClose]);
 
   if (!project) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-        {/* Modal Header */}
-        <div className="modal-header">
-          <div className="modal-title-wrap">
-            <span className="modal-project-number">{project.number}</span>
+    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="modal-window" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-top">
+          <div className="modal-meta-left">
+            <span className="modal-num">{project.number}</span>
             <div>
-              <span className="modal-category">{project.category}</span>
-              <h3 id="modal-title" className="modal-title">{project.title}</h3>
+              <span className="modal-cat">{project.category}</span>
+              <h3 className="modal-title">{project.title}</h3>
             </div>
           </div>
-          <button className="modal-close-btn" onClick={onClose} aria-label="Close project modal">
-            <X size={20} />
+          <button className="modal-close" onClick={onClose} aria-label="Close dialog">
+            <X size={18} />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="modal-body">
-          <div className="modal-summary-card">
-            <p className="modal-tagline">{project.tagline}</p>
-            <p className="modal-overview">{project.overview}</p>
-          </div>
+        <div className="modal-content">
+          <p className="modal-tagline">{project.tagline}</p>
+          <p className="modal-overview">{project.overview}</p>
 
-          {/* Architecture Highlights */}
-          <div className="modal-section">
-            <h4 className="modal-section-title">
-              <Cpu size={18} className="modal-icon" /> System Architecture & Key Decisions
-            </h4>
-            <ul className="modal-arch-list">
-              {project.architecture.map((item, idx) => (
-                <li key={idx} className="modal-arch-item">
-                  <CheckCircle2 size={16} className="modal-check-icon" />
-                  <span>{item}</span>
-                </li>
+          <div className="modal-details-block">
+            <h4>System Architecture &amp; Key Decisions</h4>
+            <ul className="modal-bullets">
+              {project.architecture.map((item, i) => (
+                <li key={i}>{item}</li>
               ))}
             </ul>
           </div>
 
-          {/* Tech Breakdown Grid */}
-          <div className="modal-tech-grid">
-            <div className="modal-tech-card">
-              <div className="modal-tech-card-header">
-                <Server size={16} />
-                <h5>Backend Engineering</h5>
-              </div>
+          <div className="modal-tech-box">
+            <div>
+              <span className="tech-heading">Backend</span>
               <p>{project.backendDetails}</p>
             </div>
-
-            <div className="modal-tech-card">
-              <div className="modal-tech-card-header">
-                <Layers size={16} />
-                <h5>Frontend & Interface</h5>
-              </div>
+            <div>
+              <span className="tech-heading">Frontend / Client</span>
               <p>{project.frontendDetails}</p>
             </div>
           </div>
 
-          {/* Tags */}
-          <div className="modal-tags">
+          <div className="tag-row modal-tags">
             {project.tags.map((tag) => (
-              <span key={tag} className="tech-badge">{tag}</span>
+              <span key={tag}>{tag}</span>
             ))}
           </div>
         </div>
 
-        {/* Modal Footer / Actions */}
-        <div className="modal-footer">
+        <div className="modal-actions">
           <a
             href={project.github}
             target="_blank"
             rel="noreferrer"
-            className="button button-outline"
+            className="social-link"
           >
-            <GithubIcon size={16} /> Source Code
+            <GithubIcon size={16} /> GitHub
           </a>
-          <a
-            href={project.liveUrl}
-            className="button button-primary"
-            onClick={(e) => {
-              if (project.liveUrl.startsWith('#')) {
-                onClose();
-              }
-            }}
-          >
-            Live Demo / Details <ExternalLink size={16} />
-          </a>
+          {project.liveUrl && project.liveUrl !== '#contact' && (
+            <a
+              href={project.liveUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="button button-primary"
+            >
+              Live demo <ArrowUpRight size={14} />
+            </a>
+          )}
         </div>
       </div>
     </div>

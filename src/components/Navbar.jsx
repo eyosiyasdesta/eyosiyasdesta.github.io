@@ -1,71 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Menu, X } from 'lucide-react';
 import Logo from './Logo';
 
 export default function Navbar({ navLinks }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 40);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
-    <header className={`site-header ${scrolled ? 'header-scrolled' : ''}`}>
-      <div className="header-inner page-width">
-        <Logo />
+    <header className="site-header">
+      <Logo />
 
-        {/* Desktop Nav */}
-        <nav className="desktop-nav" aria-label="Main navigation">
-          {navLinks.map((link) => (
-            <a key={link.number} href={link.href} className="nav-link">
-              <span className="nav-num">{link.number}</span>
-              <span className="nav-label">{link.label}</span>
-            </a>
-          ))}
-          <a href="#contact" className="nav-cta-btn">
-            Get in touch <ArrowUpRight size={14} />
+      {/* Desktop Nav */}
+      <nav className="desktop-nav" aria-label="Main navigation">
+        {navLinks.map((link) => (
+          <a key={link.number} href={link.href}>
+            <span className="nav-number">{link.number}</span>
+            {link.label}
           </a>
-        </nav>
+        ))}
+      </nav>
 
-        {/* Mobile menu button */}
-        <button
-          className="menu-button"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
-          aria-expanded={isOpen}
-        >
-          {isOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
+      {/* Mobile Menu Button */}
+      <button
+        className="menu-button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
+      >
+        {isOpen ? <X size={22} /> : <Menu size={22} />}
+      </button>
 
       {/* Mobile Drawer */}
       {isOpen && (
-        <div className="mobile-nav-drawer">
-          <div className="mobile-nav-links">
-            {navLinks.map((link) => (
-              <a
-                key={link.number}
-                href={link.href}
-                className="mobile-nav-link"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="mobile-nav-num">{link.number}</span>
-                <span className="mobile-nav-label">{link.label}</span>
-              </a>
-            ))}
+        <div className="mobile-nav">
+          {navLinks.map((link) => (
             <a
-              href="#contact"
-              className="button button-primary mobile-cta"
+              key={link.number}
+              href={link.href}
               onClick={() => setIsOpen(false)}
             >
-              Get in touch
+              <span>{link.number}</span>
+              {link.label}
             </a>
-          </div>
+          ))}
         </div>
       )}
     </header>
