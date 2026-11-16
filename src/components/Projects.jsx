@@ -7,7 +7,7 @@ export default function Projects({ projects }) {
   const [selectedProject, setSelectedProject] = useState(null);
 
   return (
-    <section id="projects" className="content-section page-width">
+    <section id="projects" className="content-section page-width section-reveal">
       <div className="section-label">
         <span>02</span>
         Selected work

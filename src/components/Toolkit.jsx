@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Toolkit({ toolkit }) {
   return (
-    <section id="toolkit" className="content-section page-width">
+    <section id="toolkit" className="content-section page-width section-reveal">
       <div className="section-label">
         <span>03</span>
         Toolkit

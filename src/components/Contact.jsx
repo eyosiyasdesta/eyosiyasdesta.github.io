@@ -4,7 +4,7 @@ import { GithubIcon, LinkedinIcon } from './Icons';
 
 export default function Contact({ personal }) {
   return (
-    <section id="contact" className="contact-section page-width">
+    <section id="contact" className="contact-section page-width section-reveal">
       <div className="section-label">
         <span>04</span>
         Contact

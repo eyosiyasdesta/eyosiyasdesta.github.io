@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function About({ about }) {
   return (
-    <section id="about" className="content-section page-width">
+    <section id="about" className="content-section page-width section-reveal">
       <div className="section-label">
         <span>01</span>
         About background
